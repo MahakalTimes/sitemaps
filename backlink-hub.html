@@ -1,146 +1,56 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>MahakalTimes — Backlink Hub (Auto from Sitemaps)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="robots" content="index,follow" />
-  <style>
-    body { font-family: system-ui, Arial, sans-serif; margin: 24px; }
-    h1 { margin: 0 0 8px; }
-    .muted { color: #666; margin: 0 0 16px; }
-    .controls { display: flex; gap: 12px; align-items: center; margin: 12px 0 16px; }
-    input[type="search"] { padding: 10px 12px; flex: 1; border: 1px solid #ddd; border-radius: 8px; }
-    button { padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; background: #f7f7f7; cursor: pointer; }
-    button:hover { background: #eee; }
-    .stats { margin: 6px 0 16px; color:#333; }
-    ol { line-height: 1.6; padding-left: 20px; }
-    li { margin-bottom: 4px; }
-    a { color: #0645ad; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    .err { color: #b00020; }
-  </style>
+<meta charset="utf-8">
+<title>Backlink Hub | MahakalTimes</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="canonical" href="https://sitemaps.mahakaltimes.com/backlink-hub.html">
+<link rel="stylesheet" href="/assets/styles.css">
+<meta name="robots" content="index,follow">
 </head>
 <body>
-  <h1>MahakalTimes — Backlink Hub</h1>
-  <p class="muted">Ye page niche diye gaye <b>sitemaps</b> ko live read karta hai aur sabhi backlinks ki list bana deta hai.</p>
+  <!-- Navbar -->
+  <header class="header">
+    <nav class="nav">
+      <a href="/" class="logo">MahakalTimes Sitemaps</a>
+      <div class="links">
+        <a href="/backlink-hub.html" data-nav="backlinks">Backlink Hub</a>
+        <a href="/tier3-hub.html" data-nav="tier3">Tier-3 Hub</a>
+        <a href="/press-coverage.html" data-nav="press">Press Coverage</a>
+        <a href="/sitemap_index.xml" data-nav="sitemaps">Sitemaps</a>
+      </div>
+    </nav>
+  </header>
 
-  <div class="controls">
-    <input id="q" type="search" placeholder="Search domain/path… (e.g. blogoxo, press, /profile)" />
-    <button id="clearBtn">Clear</button>
-    <button id="copyBtn" title="Copy all visible links">Copy Visible</button>
-  </div>
+  <main class="container">
+    <div class="card">
+      <h1>Backlink Hub</h1>
+      <p class="small">HTML directory of external backlinks. Not included in XML—to avoid GSC errors.</p>
+      <input id="q" class="input" placeholder="Search backlinks (domain / title / note)…" />
+      <p class="small">Tip: press <span class="kbd">/</span> to focus search.</p>
+      <div id="links" class="grid" style="margin-top:12px">
+        <!-- Inject your fetched links as cards:
+        <div class="card col-12 link-item">
+          <a href="https://example.com/page" rel="nofollow">Example.com – Article Title</a>
+          <div class="small">Anchor: “Mahakal Times” • Type: Editorial</div>
+        </div>
+        -->
+      </div>
+    </div>
+  </main>
 
-  <div class="stats" id="stats">Loading…</div>
-  <div id="errors"></div>
-  <ol id="list"></ol>
+  <footer class="footer"><div class="container small">HTML hub only; no external links in sitemaps.</div></footer>
 
-  <script>
-    // 👉 Yahi par apne sitemap URLs rakho (same domain par host hon to best/CORS-safe)
-    const SITEMAP_URLS = [
-      "https://sitemaps.mahakaltimes.com/sitemap-part-1.xml",
-      "https://sitemaps.mahakaltimes.com/sitemap-press-fixed.xml"
-    ];
+  <script type="module">
+    import { attachSearch } from '/assets/app.js';
+    // Keyboard focus for '/'
+    addEventListener('keydown',e=>{ if(e.key==='/'){ e.preventDefault(); document.getElementById('q')?.focus(); }});
+    // Attach client search
+    attachSearch('#q', '.link-item');
 
-    const elList = document.getElementById("list");
-    const elStats = document.getElementById("stats");
-    const elErrors = document.getElementById("errors");
-    const q = document.getElementById("q");
-    const clearBtn = document.getElementById("clearBtn");
-    const copyBtn  = document.getElementById("copyBtn");
-
-    const allLinks = new Set();  // de-duplicate
-    let visibleLinks = [];
-
-    function parseSitemap(xmlText) {
-      const doc = new DOMParser().parseFromString(xmlText, "application/xml");
-      const err = doc.querySelector("parsererror");
-      if (err) throw new Error("XML parse error");
-      const locs = [...doc.querySelectorAll("loc")].map(n => n.textContent.trim()).filter(Boolean);
-      return locs;
-    }
-
-    async function fetchAll() {
-      elStats.textContent = "Loading sitemaps…";
-      elErrors.textContent = "";
-      let fetched = 0, added = 0;
-
-      for (const url of SITEMAP_URLS) {
-        try {
-          const res = await fetch(url, {cache: "no-store"});
-          if (!res.ok) throw new Error(res.status + " " + res.statusText);
-          const txt = await res.text();
-          const locs = parseSitemap(txt);
-
-          // basic URL check
-          for (const u of locs) {
-            try {
-              const parsed = new URL(u);
-              // keep only http/https
-              if (parsed.protocol === "http:" || parsed.protocol === "https:") {
-                if (!allLinks.has(u)) {
-                  allLinks.add(u);
-                  added++;
-                }
-              }
-            } catch(e) {
-              // skip invalid
-            }
-          }
-          fetched++;
-        } catch (e) {
-          const p = document.createElement("p");
-          p.className = "err";
-          p.textContent = "Failed to load " + url + " → " + e.message;
-          elErrors.appendChild(p);
-        }
-      }
-
-      visibleLinks = Array.from(allLinks);
-      render();
-      elStats.textContent = `Sitemaps loaded: ${fetched}/${SITEMAP_URLS.length} • Total links: ${allLinks.size} • Showing: ${visibleLinks.length}`;
-    }
-
-    function render() {
-      elList.innerHTML = "";
-      const frag = document.createDocumentFragment();
-      for (const u of visibleLinks) {
-        const li = document.createElement("li");
-        const a = document.createElement("a");
-        a.href = u; a.textContent = u;
-        a.target = "_blank";
-        a.rel = "nofollow noopener";
-        li.appendChild(a);
-        frag.appendChild(li);
-      }
-      elList.appendChild(frag);
-    }
-
-    function applyFilter() {
-      const term = q.value.trim().toLowerCase();
-      if (!term) {
-        visibleLinks = Array.from(allLinks);
-      } else {
-        visibleLinks = Array.from(allLinks).filter(u => u.toLowerCase().includes(term));
-      }
-      render();
-      elStats.textContent = `Total links: ${allLinks.size} • Showing: ${visibleLinks.length}${q.value ? " (filtered)" : ""}`;
-    }
-
-    q.addEventListener("input", applyFilter);
-    clearBtn.addEventListener("click", () => { q.value = ""; applyFilter(); });
-
-    copyBtn.addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(visibleLinks.join("\n"));
-        copyBtn.textContent = "Copied!";
-        setTimeout(() => copyBtn.textContent = "Copy Visible", 1200);
-      } catch {
-        alert("Copy failed");
-      }
-    });
-
-    fetchAll();
+    // TODO: Your existing auto-fetch logic:
+    // fetch('/data/backlinks.json').then(r=>r.json()).then(render)
+    // function render(rows){ ...create .link-item cards into #links ... }
   </script>
 </body>
 </html>
