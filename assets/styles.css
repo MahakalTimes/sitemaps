@@ -45,4 +45,5 @@ footer{border-top:1px solid var(--line);background:var(--card);margin-top:32px}
 .stats{margin:6px 0 16px;color:var(--muted)}
 .list{line-height:1.6;padding-left:20px}
 .err{color:#ff7b7b}
+.list{max-height:65vh;overflow:auto;line-height:1.6;padding-left:20px}
 
