@@ -1,4 +1,4 @@
-// Apply saved theme or system preference
+// Theme: apply saved choice or system preference
 (function(){
   const saved = localStorage.getItem('mt-theme');
   if(saved){
@@ -8,7 +8,7 @@
   }
 })();
 
-// Toggle button
+// Toggle theme
 document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById('themeToggle');
   if(!btn) return;
