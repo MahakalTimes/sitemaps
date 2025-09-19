@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="index,follow" />
   <link rel="canonical" href="https://sitemaps.mahakaltimes.com/backlink-hub.html">
+
+  <!-- Site CSS -->
   <link rel="stylesheet" href="/assets/styles.css">
 </head>
 <body>
@@ -17,8 +19,9 @@
         <a href="/backlink-hub.html">Backlink Hub</a>
         <a href="/tier3-hub.html">Tier-3 Hub</a>
         <a href="/press-coverage.html">Press Coverage</a>
-        <a href="/sitemap_index_final.xml">Sitemap Index</a>
-        <button id="themeToggle" class="toggle" type="button">🌗 Theme</button>
+        <!-- Technical file in new tab -->
+        <a href="/sitemap_index_final.xml" target="_blank" rel="noopener">Sitemap Index</a>
+        <button id="themeToggle" class="toggle" type="button">Theme</button>
       </div>
     </nav>
   </header>
@@ -26,11 +29,14 @@
   <!-- Main -->
   <main class="wrap">
     <section class="card">
-      <h1>Backlink Hub</h1>
-      <p class="muted">HTML directory of external backlinks. Not included in XML—to avoid GSC errors.</p>
+      <h1>Backlink Hub — Mentions of MahakalTimes</h1>
+      <p class="muted">
+        Curated list of external mentions. We keep it transparent and updated. External links are listed here (HTML) —
+        never inside XML sitemaps — to keep Google Search Console clean.
+      </p>
 
       <div class="controls">
-        <input id="q" class="input" type="search" placeholder="Search backlinks (domain / title / path) …" />
+        <input id="q" class="input" type="search" placeholder="Search by domain / title / URL…" />
         <button id="clearBtn" class="btn" type="button">Clear</button>
         <button id="copyBtn" class="btn" type="button" title="Copy all visible links">Copy Visible</button>
       </div>
@@ -38,10 +44,16 @@
       <div class="stats" id="stats">Loading…</div>
       <div id="errors"></div>
 
-      <!-- Backlinks list -->
+      <!-- Backlinks cards -->
       <ol id="list" class="list"></ol>
 
-      <p class="muted" style="margin-top:12px">HTML hub only; no external links in sitemaps.</p>
+      <div class="note" style="margin-top:16px">
+        <p class="muted small">
+          Link policy: This hub lists genuine public mentions of MahakalTimes. No paid or hidden links are included.
+          If any entry is sponsored, it will be marked with <code>rel="sponsored"</code>.
+          Related internal links are provided to help users and improve topical context.
+        </p>
+      </div>
     </section>
   </main>
 
@@ -53,14 +65,16 @@
           <h4>MahakalTimes Sitemaps</h4>
           <p>Utility subdomain for XML sitemaps & backlink hubs. Helps Google index our domain cleanly.</p>
         </div>
+
         <div class="fcol">
           <h5>Technical</h5>
           <div class="flinks">
-            <a href="/sitemap_index_final.xml">Sitemap Index (XML)</a>
-            <a href="/robots.txt">robots.txt</a>
+            <a href="/sitemap_index_final.xml" target="_blank" rel="noopener">Sitemap Index (XML)</a>
+            <a href="/robots.txt" target="_blank" rel="noopener">robots.txt</a>
             <a href="/404.html">Custom 404</a>
           </div>
         </div>
+
         <div class="fcol">
           <h5>Info</h5>
           <div class="flinks">
@@ -71,6 +85,7 @@
           </div>
         </div>
       </div>
+
       <div class="footer-bottom">
         <div>© 2025 MahakalTimes</div>
         <div>Contact: info@mahakaltimes.com</div>
@@ -78,29 +93,60 @@
     </div>
   </footer>
 
-  <!-- JS -->
+  <!-- Scripts -->
   <script src="/assets/app.js"></script>
   <script>
+    // Source sitemaps that list external mentions (HTML hub fetches from here)
     const SITEMAP_URLS = [
       "https://sitemaps.mahakaltimes.com/sitemap-part-1.xml",
       "https://sitemaps.mahakaltimes.com/sitemap-press-fixed.xml"
     ];
 
-    const elList = document.getElementById("list");
-    const elStats = document.getElementById("stats");
+    const elList   = document.getElementById("list");
+    const elStats  = document.getElementById("stats");
     const elErrors = document.getElementById("errors");
-    const q = document.getElementById("q");
+    const q        = document.getElementById("q");
     const clearBtn = document.getElementById("clearBtn");
     const copyBtn  = document.getElementById("copyBtn");
 
-    const allLinks = new Set();
-    let visibleLinks = [];
+    // We'll store unique items keyed by URL
+    /** @type {Map<string,{url:string,lastmod?:string,domain:string}>} */
+    const linkMap = new Map();
+    /** @type {Array<{url:string,lastmod?:string,domain:string}>} */
+    let visible = [];
 
+    function getDomain(u) {
+      try { return new URL(u).hostname.replace(/^www\./,''); } catch { return ""; }
+    }
+
+    // Parse <url><loc>..</loc><lastmod>..</lastmod></url> or <loc> flat pattern
     function parseSitemap(xmlText) {
       const doc = new DOMParser().parseFromString(xmlText, "application/xml");
       const err = doc.querySelector("parsererror");
       if (err) throw new Error("XML parse error");
-      return [...doc.querySelectorAll("loc")].map(n => n.textContent.trim()).filter(Boolean);
+
+      const items = [];
+
+      // Preferred: iterate url entries (standard urlset format)
+      doc.querySelectorAll("url").forEach(node => {
+        const loc = node.querySelector("loc");
+        if (!loc) return;
+        const url = (loc.textContent || "").trim();
+        if (!url) return;
+        const lmEl = node.querySelector("lastmod");
+        const lastmod = lmEl ? (lmEl.textContent || "").trim() : undefined;
+        items.push({ url, lastmod });
+      });
+
+      // Fallback: if no <url> nodes, collect plain <loc>
+      if (items.length === 0) {
+        doc.querySelectorAll("loc").forEach(loc => {
+          const url = (loc.textContent || "").trim();
+          if (url) items.push({ url });
+        });
+      }
+
+      return items;
     }
 
     async function fetchAll() {
@@ -110,16 +156,23 @@
 
       for (const url of SITEMAP_URLS) {
         try {
-          const res = await fetch(url, {cache: "no-store"});
+          const res = await fetch(url, { cache: "no-store" });
           if (!res.ok) throw new Error(res.status + " " + res.statusText);
           const txt = await res.text();
-          const locs = parseSitemap(txt);
-          for (const u of locs) {
+          const entries = parseSitemap(txt);
+
+          for (const item of entries) {
+            const u = item.url;
             try {
               const parsed = new URL(u);
-              if (parsed.protocol === "http:" || parsed.protocol === "https:") allLinks.add(u);
-            } catch {}
+              if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+                const domain = getDomain(u);
+                // dedupe by URL
+                if (!linkMap.has(u)) linkMap.set(u, { url: u, lastmod: item.lastmod, domain });
+              }
+            } catch { /* ignore invalid URLs */ }
           }
+
           fetched++;
         } catch (e) {
           const p = document.createElement("p");
@@ -129,32 +182,43 @@
         }
       }
 
-      visibleLinks = Array.from(allLinks);
+      visible = Array.from(linkMap.values());
       render();
-      elStats.textContent = `Sitemaps loaded: ${fetched}/${SITEMAP_URLS.length} • Total links: ${allLinks.size} • Showing: ${visibleLinks.length}`;
+      elStats.textContent = `Sitemaps loaded: ${fetched}/${SITEMAP_URLS.length} • Total links: ${linkMap.size} • Showing: ${visible.length}`;
     }
 
     function render() {
       elList.innerHTML = "";
       const frag = document.createDocumentFragment();
-      for (const u of visibleLinks) {
+
+      // Cards: show domain as title, link, optional lastmod, and an internal related link
+      for (const item of visible) {
         const li = document.createElement("li");
-        const a = document.createElement("a");
-        a.href = u;
-        a.textContent = u;
-        a.target = "_blank";
-        a.rel = "nofollow noopener";
-        li.appendChild(a);
+        li.className = "card";
+        const lm = item.lastmod ? `<span class="muted">Lastmod: ${item.lastmod}</span>` : "";
+        li.innerHTML = `
+          <h2>${item.domain || "External Mention"}</h2>
+          <p><a href="${item.url}" target="_blank" rel="noopener">${item.url}</a></p>
+          <p class="muted">Related on our site: <a href="https://mahakaltimes.com/news/" target="_blank" rel="noopener">MahakalTimes News</a></p>
+          ${lm ? `<p>${lm}</p>` : ""}
+        `;
         frag.appendChild(li);
       }
+
       elList.appendChild(frag);
     }
 
     function applyFilter() {
       const term = q.value.trim().toLowerCase();
-      visibleLinks = term ? Array.from(allLinks).filter(u => u.toLowerCase().includes(term)) : Array.from(allLinks);
+      if (!term) {
+        visible = Array.from(linkMap.values());
+      } else {
+        visible = Array.from(linkMap.values()).filter(v =>
+          v.url.toLowerCase().includes(term) || (v.domain && v.domain.toLowerCase().includes(term))
+        );
+      }
       render();
-      elStats.textContent = `Total links: ${allLinks.size} • Showing: ${visibleLinks.length}${term ? " (filtered)" : ""}`;
+      elStats.textContent = `Total links: ${linkMap.size} • Showing: ${visible.length}${term ? " (filtered)" : ""}`;
     }
 
     q.addEventListener("input", applyFilter);
@@ -162,9 +226,10 @@
 
     copyBtn.addEventListener("click", async () => {
       try {
-        await navigator.clipboard.writeText(visibleLinks.join("\n"));
+        const text = visible.map(v => v.url).join("\n");
+        await navigator.clipboard.writeText(text);
         copyBtn.textContent = "Copied!";
-        setTimeout(()=>copyBtn.textContent="Copy Visible",1200);
+        setTimeout(() => copyBtn.textContent = "Copy Visible", 1200);
       } catch { alert("Copy failed"); }
     });
 
