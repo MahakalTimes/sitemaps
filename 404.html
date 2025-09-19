@@ -1,31 +1,118 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="h-100">
 <head>
-<meta charset="utf-8">
-<title>Page Not Found – MahakalTimes Sitemaps</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="/assets/styles.css">
-<meta name="robots" content="noindex,follow">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Page not found (404) · MahakalTimes Sitemaps</title>
+  <meta name="robots" content="noindex,follow" />
+  <link rel="icon" href="/images/favicon.png" />
+  <link rel="preload" href="/assets/index.css" as="style">
+  <link rel="stylesheet" href="/assets/index.css">
+  <meta property="og:title" content="404 – Page not found" />
+  <meta property="og:site_name" content="MahakalTimes Sitemaps" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://sitemaps.mahakaltimes.com/404.html" />
+  <meta name="twitter:card" content="summary" />
+
+  <!-- WebSite SearchAction (helps sitelinks search) -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"WebSite",
+    "url":"https://sitemaps.mahakaltimes.com/",
+    "name":"MahakalTimes Sitemaps",
+    "potentialAction":{
+      "@type":"SearchAction",
+      "target":"https://www.google.com/search?q=site:sitemaps.mahakaltimes.com+{search_term_string}",
+      "query-input":"required name=search_term_string"
+    }
+  }
+  </script>
+  <style>
+    .wrap{max-width:880px;margin:0 auto;padding:32px}
+    .stack{display:flex;flex-direction:column;gap:16px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+    .card{border:1px solid var(--line,#333);border-radius:12px;padding:16px;background:var(--card,#111)}
+    .muted{opacity:.8}
+    input[type="search"]{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line,#333);background:var(--card,#111);color:inherit}
+    .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid var(--line,#333);text-decoration:none}
+  </style>
 </head>
-<body>
-  <header class="header">
-    <nav class="nav">
-      <a href="/" class="logo">MahakalTimes Sitemaps</a>
-      <div class="links">
-        <a href="/">Home</a>
-        <a href="/backlink-hub.html">Backlink Hub</a>
-        <a href="/sitemap_index.xml">Sitemaps</a>
-      </div>
-    </nav>
-  </header>
-  <main class="container">
-    <div class="card">
-      <h1>Page Not Found</h1>
-      <p class="small">The page you are looking for doesn’t exist or may have been moved. Please use the navigation links above to continue.</p>
+<body class="h-100">
+  <!-- TODO: include your shared navbar + theme switcher component here -->
+
+  <main class="wrap stack">
+    <h1>404 — Page not found</h1>
+    <p class="muted">लगता है यह लिंक बदल गया है या मौजूद नहीं है। नीचे कुछ उपयोगी रास्ते और सुझाए गए लिंक हैं।</p>
+
+    <div class="grid">
+      <a class="card" href="/index.html"><strong>🏠 Home (Sitemaps Hub)</strong><br><span class="muted">सारे sitemap hubs और ऑटो लिस्ट</span></a>
+      <a class="card" href="/backlink-hub.html"><strong>🔗 Backlink Hub</strong><br><span class="muted">sitemap-part फाइलों से ऑटो</span></a>
+      <a class="card" href="/press-coverage.html"><strong>📰 Press Coverage</strong><br><span class="muted">sitemap-press-fixed.xml से ऑटो</span></a>
+      <a class="card" href="/tier3-hub.html"><strong>📚 Tier-3 Hub</strong><br><span class="muted">स्टैटिक curated सूची</span></a>
+      <a class="card" href="/about.html"><strong>ℹ️ About</strong></a>
+      <a class="card" href="/changelog.html"><strong>🛠 Changelog</strong></a>
+      <a class="card" href="/privacy.html"><strong>🔒 Privacy</strong></a>
+      <a class="card" href="/terms.html"><strong>📄 Terms</strong></a>
     </div>
+
+    <section class="stack">
+      <h2>Quick search</h2>
+      <form action="https://www.google.com/search" method="get">
+        <input type="hidden" name="q" value="site:sitemaps.mahakaltimes.com">
+        <input type="search" name="q" placeholder="Search this subdomain…" oninput="this.form.q.value='site:sitemaps.mahakaltimes.com '+this.value">
+      </form>
+      <p class="muted">Tip: आप <code>site:sitemaps.mahakaltimes.com</code> के साथ किसी भी शब्द से खोज सकते हैं।</p>
+    </section>
+
+    <section id="suggest" class="stack">
+      <h2>Suggested links</h2>
+      <div id="sug-list" class="grid"></div>
+      <p class="muted">Auto-suggest टूटे slug के आधार पर।</p>
+    </section>
+
+    <p class="muted">Auto-redirect in ~30 seconds to <a href="/index.html">Home</a>.</p>
   </main>
-  <footer class="footer">
-    <div class="container small">© MahakalTimes. All rights reserved.</div>
-  </footer>
+
+  <!-- TODO: include your shared footer component here -->
+
+  <script>
+  // Simple slug-based suggestions
+  (function(){
+    const path = (location.pathname || '').toLowerCase();
+    const hints = [
+      {key:'press', url:'/press-coverage.html', label:'Press Coverage'},
+      {key:'backlink', url:'/backlink-hub.html', label:'Backlink Hub'},
+      {key:'tier', url:'/tier3-hub.html', label:'Tier-3 Hub'},
+      {key:'about', url:'/about.html', label:'About'},
+      {key:'privacy', url:'/privacy.html', label:'Privacy'},
+      {key:'terms', url:'/terms.html', label:'Terms'},
+      {key:'change', url:'/changelog.html', label:'Changelog'},
+      {key:'index', url:'/index.html', label:'Sitemaps Home'}
+    ];
+    const out = document.getElementById('sug-list');
+    let shown = 0;
+    hints.forEach(h=>{
+      if(path.includes(h.key)){
+        const a=document.createElement('a');
+        a.className='card';
+        a.href=h.url;
+        a.innerHTML='<strong>Maybe you meant:</strong><br><span class="muted">'+h.label+'</span>';
+        out.appendChild(a);
+        shown++;
+      }
+    });
+    if(!shown){
+      // default few
+      ['press-coverage.html','backlink-hub.html','tier3-hub.html'].forEach(u=>{
+        const a=document.createElement('a'); a.className='card'; a.href='/'+u;
+        a.innerHTML='<strong>'+u.replace('.html','')+'</strong><br><span class="muted">Quick access</span>';
+        out.appendChild(a);
+      });
+    }
+    // soft redirect
+    setTimeout(()=>{ location.href='/index.html'; }, 30000);
+  })();
+  </script>
 </body>
 </html>
