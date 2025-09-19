@@ -1,29 +1,21 @@
-// Active nav link
-(() => {
-  const path = location.pathname;
-  const map = {
-    "/backlink-hub.html":"backlinks",
-    "/tier3-hub.html":"tier3",
-    "/press-coverage.html":"press",
-    "/sitemap_index.xml":"sitemaps",
-    "/":"home"
-  };
-  const key = map[path] || "";
-  document.querySelectorAll(`[data-nav="${key}"]`).forEach(a=>{
-    a.classList.add("active");
-  });
+// Apply saved theme or system preference
+(function(){
+  const saved = localStorage.getItem('mt-theme');
+  if(saved){
+    document.documentElement.setAttribute('data-theme', saved);
+  } else if(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches){
+    document.documentElement.setAttribute('data-theme','light');
+  }
 })();
 
-// Simple client-side search (used on hubs if #q present)
-export function attachSearch(inputSel, listSel){
-  const $i = document.querySelector(inputSel);
-  const $list = document.querySelectorAll(listSel);
-  if(!$i || !$list.length) return;
-  $i.addEventListener('input', () => {
-    const q = $i.value.trim().toLowerCase();
-    $list.forEach(item=>{
-      const hay = item.textContent.toLowerCase();
-      item.style.display = hay.includes(q) ? "" : "none";
-    });
+// Toggle button
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById('themeToggle');
+  if(!btn) return;
+  btn.addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('mt-theme', next);
   });
-}
+});
