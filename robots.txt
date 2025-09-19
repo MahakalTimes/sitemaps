@@ -1,6 +1,9 @@
 User-agent: *
 Allow: /
 
+# Subdomain Sitemap Index
 Sitemap: https://sitemaps.mahakaltimes.com/sitemap_index_final.xml
+
+# Component sitemaps
 Sitemap: https://sitemaps.mahakaltimes.com/sitemap-part-1.xml
 Sitemap: https://sitemaps.mahakaltimes.com/sitemap-press-fixed.xml
