@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>MahakalTimes — Backlink Hub (Auto from Sitemaps)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="index,follow" />
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 24px; }
+    h1 { margin: 0 0 8px; }
+    .muted { color: #666; margin: 0 0 16px; }
+    .controls { display: flex; gap: 12px; align-items: center; margin: 12px 0 16px; }
+    input[type="search"] { padding: 10px 12px; flex: 1; border: 1px solid #ddd; border-radius: 8px; }
+    button { padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; background: #f7f7f7; cursor: pointer; }
+    button:hover { background: #eee; }
+    .stats { margin: 6px 0 16px; color:#333; }
+    ol { line-height: 1.6; padding-left: 20px; }
+    li { margin-bottom: 4px; }
+    a { color: #0645ad; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .err { color: #b00020; }
+  </style>
+</head>
+<body>
+  <h1>MahakalTimes — Backlink Hub</h1>
+  <p class="muted">Ye page niche diye gaye <b>sitemaps</b> ko live read karta hai aur sabhi backlinks ki list bana deta hai.</p>
+
+  <div class="controls">
+    <input id="q" type="search" placeholder="Search domain/path… (e.g. blogoxo, press, /profile)" />
+    <button id="clearBtn">Clear</button>
+    <button id="copyBtn" title="Copy all visible links">Copy Visible</button>
+  </div>
+
+  <div class="stats" id="stats">Loading…</div>
+  <div id="errors"></div>
+  <ol id="list"></ol>
+
+  <script>
+    // 👉 Yahi par apne sitemap URLs rakho (same domain par host hon to best/CORS-safe)
+    const SITEMAP_URLS = [
+      "https://sitemaps.mahakaltimes.com/sitemap-part-1.xml",
+      "https://sitemaps.mahakaltimes.com/sitemap-press-fixed.xml"
+    ];
+
+    const elList = document.getElementById("list");
+    const elStats = document.getElementById("stats");
+    const elErrors = document.getElementById("errors");
+    const q = document.getElementById("q");
+    const clearBtn = document.getElementById("clearBtn");
+    const copyBtn  = document.getElementById("copyBtn");
+
+    const allLinks = new Set();  // de-duplicate
+    let visibleLinks = [];
+
+    function parseSitemap(xmlText) {
+      const doc = new DOMParser().parseFromString(xmlText, "application/xml");
+      const err = doc.querySelector("parsererror");
+      if (err) throw new Error("XML parse error");
+      const locs = [...doc.querySelectorAll("loc")].map(n => n.textContent.trim()).filter(Boolean);
+      return locs;
+    }
+
+    async function fetchAll() {
+      elStats.textContent = "Loading sitemaps…";
+      elErrors.textContent = "";
+      let fetched = 0, added = 0;
+
+      for (const url of SITEMAP_URLS) {
+        try {
+          const res = await fetch(url, {cache: "no-store"});
+          if (!res.ok) throw new Error(res.status + " " + res.statusText);
+          const txt = await res.text();
+          const locs = parseSitemap(txt);
+
+          // basic URL check
+          for (const u of locs) {
+            try {
+              const parsed = new URL(u);
+              // keep only http/https
+              if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+                if (!allLinks.has(u)) {
+                  allLinks.add(u);
+                  added++;
+                }
+              }
+            } catch(e) {
+              // skip invalid
+            }
+          }
+          fetched++;
+        } catch (e) {
+          const p = document.createElement("p");
+          p.className = "err";
+          p.textContent = "Failed to load " + url + " → " + e.message;
+          elErrors.appendChild(p);
+        }
+      }
+
+      visibleLinks = Array.from(allLinks);
+      render();
+      elStats.textContent = `Sitemaps loaded: ${fetched}/${SITEMAP_URLS.length} • Total links: ${allLinks.size} • Showing: ${visibleLinks.length}`;
+    }
+
+    function render() {
+      elList.innerHTML = "";
+      const frag = document.createDocumentFragment();
+      for (const u of visibleLinks) {
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.href = u; a.textContent = u;
+        a.target = "_blank";
+        a.rel = "nofollow noopener";
+        li.appendChild(a);
+        frag.appendChild(li);
+      }
+      elList.appendChild(frag);
+    }
+
+    function applyFilter() {
+      const term = q.value.trim().toLowerCase();
+      if (!term) {
+        visibleLinks = Array.from(allLinks);
+      } else {
+        visibleLinks = Array.from(allLinks).filter(u => u.toLowerCase().includes(term));
+      }
+      render();
+      elStats.textContent = `Total links: ${allLinks.size} • Showing: ${visibleLinks.length}${q.value ? " (filtered)" : ""}`;
+    }
+
+    q.addEventListener("input", applyFilter);
+    clearBtn.addEventListener("click", () => { q.value = ""; applyFilter(); });
+
+    copyBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(visibleLinks.join("\n"));
+        copyBtn.textContent = "Copied!";
+        setTimeout(() => copyBtn.textContent = "Copy Visible", 1200);
+      } catch {
+        alert("Copy failed");
+      }
+    });
+
+    fetchAll();
+  </script>
+</body>
+</html>
