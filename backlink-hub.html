@@ -26,23 +26,25 @@
   <!-- Main -->
   <main class="wrap">
     <section class="card">
-      <h1>Backlink Hub</h1>
-      <p class="muted">HTML directory of external backlinks. Not included in XML—to avoid GSC errors.</p>
+  <h1>Backlink Hub</h1>
+  <p class="muted">HTML directory of external backlinks. Not included in XML—to avoid GSC errors.</p>
 
-      <div class="controls">
-        <input id="q" class="input" type="search" placeholder="Search backlinks (domain / title / path) …" />
-        <button id="clearBtn" class="btn" type="button">Clear</button>
-        <button id="copyBtn" class="btn" type="button" title="Copy all visible links">Copy Visible</button>
-      </div>
+  <div class="controls">
+    <input id="q" class="input" type="search" placeholder="Search backlinks (domain / title / path) …" />
+    <button id="clearBtn" class="btn" type="button">Clear</button>
+    <button id="copyBtn" class="btn" type="button" title="Copy all visible links">Copy Visible</button>
+  </div>
 
-      <div class="stats" id="stats">Loading…</div>
-      <div id="errors"></div>
-      <ol id="list" class="list"></ol>
-    </section>
+  <div class="stats" id="stats">Loading…</div>
+  <div id="errors"></div>
 
-    <p class="muted" style="margin-top:12px">HTML hub only; no external links in sitemaps.</p>
-  </main>
+  <!-- 👇 Now the list is also inside this card -->
+  <ol id="list" class="list"></ol>
 
+ <p class="muted" style="margin-top:12px">HTML hub only; no external links in sitemaps.</p>
+  </section>
+</main>
+  
   <!-- Footer (same as index) -->
   <footer>
     <div class="footer-wrap">
