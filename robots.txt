@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sitemaps.mahakaltimes.com/sitemap_index.xml
+# (Optional) You may also link canonical domain sitemaps for convenience:
+Sitemap: https://mahakaltimes.com/wp-sitemap.xml
+Sitemap: https://mahakaltimes.com/hi/wp-sitemap.xml
