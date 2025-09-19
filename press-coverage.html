@@ -8,21 +8,9 @@
   <link rel="canonical" href="https://sitemaps.mahakaltimes.com/press-coverage.html">
   <link rel="stylesheet" href="/assets/styles.css">
 
-  <!-- JSON-LD: ItemList of press articles -->
+  <!-- Optional JSON-LD: ItemList of press articles (list gets populated via JS below) -->
   <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"ItemList",
-    "name":"MahakalTimes Press Coverage",
-    "itemListElement":[
-      {
-        "@type":"ListItem","position":1,
-        "item":{"@type":"NewsArticle","headline":"Sample Mention Title",
-          "mainEntityOfPage":"https://news.example.com/mahakaltimes-feature",
-          "datePublished":"2025-08-30"}
-      }
-    ]
-  }
+  { "@context":"https://schema.org", "@type":"ItemList", "name":"MahakalTimes Press Coverage", "itemListElement":[] }
   </script>
 </head>
 <body>
@@ -43,26 +31,19 @@
   <main class="wrap">
     <section class="card">
       <h1>Press Coverage</h1>
-      <p class="muted">Earned media mentions and articles about MahakalTimes. (External links listed in HTML only; not in sitemaps.)</p>
+      <p class="muted">Earned media mentions and articles about MahakalTimes (HTML-only list; not included in XML sitemaps).</p>
 
       <div class="controls">
-        <input id="q" class="input" type="search" placeholder="Search by outlet / title …" />
+        <input id="q" class="input" type="search" placeholder="Search by outlet / title / domain …" />
         <button id="clearBtn" class="btn" type="button">Clear</button>
+        <button id="copyBtn" class="btn" type="button">Copy Visible</button>
       </div>
 
-      <div class="stats" id="stats"></div>
+      <div class="stats" id="stats">Loading…</div>
+      <div id="errors"></div>
+      <ol id="pressList" class="list"></ol>
 
-      <!-- Press list -->
-      <ol id="pressList" class="list">
-        <!-- sample item (duplicate and edit) -->
-        <li data-outlet="News Example" data-date="2025-08-30">
-          <a href="https://news.example.com/mahakaltimes-feature" target="_blank" rel="nofollow noopener">
-            Sample Mention Title — News Example (2025-08-30)
-          </a>
-        </li>
-      </ol>
-
-      <p class="muted" style="margin-top:12px">To request an addition or correction, write to info@mahakaltimes.com.</p>
+      <p class="muted" style="margin-top:12px">To request an addition/correction, write to info@mahakaltimes.com.</p>
     </section>
   </main>
 
@@ -101,25 +82,86 @@
 
   <script src="/assets/app.js"></script>
   <script>
-    const q = document.getElementById('q');
-    const clearBtn = document.getElementById('clearBtn');
+    // 👉 Press sitemap source (your file)
+    const PRESS_SITEMAP = "https://sitemaps.mahakaltimes.com/sitemap-press-fixed.xml";
+
     const list = document.getElementById('pressList');
     const stats = document.getElementById('stats');
+    const errs  = document.getElementById('errors');
+    const q     = document.getElementById('q');
+    const clearBtn = document.getElementById('clearBtn');
+    const copyBtn  = document.getElementById('copyBtn');
 
-    function filter() {
-      const term = (q.value||'').toLowerCase().trim();
-      let shown = 0;
-      [...list.children].forEach(li=>{
-        const hay = li.textContent.toLowerCase();
-        const show = !term || hay.includes(term);
-        li.style.display = show ? '' : 'none';
-        if (show) shown++;
-      });
-      stats.textContent = `Total: ${list.children.length} • Showing: ${shown}${term ? ' (filtered)' : ''}`;
+    const all = new Set(); // de-dup
+    let visible = [];
+
+    function parseSitemap(xmlText){
+      const doc = new DOMParser().parseFromString(xmlText, "application/xml");
+      const err = doc.querySelector("parsererror");
+      if (err) throw new Error("XML parse error");
+      return [...doc.querySelectorAll("loc")].map(n => n.textContent.trim()).filter(Boolean);
     }
+
+    function outletFrom(url){
+      try{
+        const u = new URL(url);
+        return u.hostname.replace(/^www\./,'');
+      }catch{return 'external';}
+    }
+
+    async function load(){
+      stats.textContent = "Loading press sitemap…";
+      try{
+        const res = await fetch(PRESS_SITEMAP, {cache:"no-store"});
+        if(!res.ok) throw new Error(res.status + " " + res.statusText);
+        const xml = await res.text();
+        const locs = parseSitemap(xml);
+        locs.forEach(u => {
+          try {
+            const p = new URL(u);
+            if (p.protocol === "http:" || p.protocol === "https:") all.add(u);
+          } catch {}
+        });
+      }catch(e){
+        const p = document.createElement('p'); p.className='err';
+        p.textContent = "Failed to load press sitemap → " + e.message;
+        errs.appendChild(p);
+      }
+      visible = Array.from(all);
+      render();
+      stats.textContent = `Total links: ${all.size} • Showing: ${visible.length}`;
+    }
+
+    function render(){
+      list.innerHTML = "";
+      const frag = document.createDocumentFragment();
+      visible.forEach(u=>{
+        const li = document.createElement('li');
+        const a  = document.createElement('a');
+        a.href = u; a.textContent = `${outletFrom(u)} — ${u}`;
+        a.target = "_blank"; a.rel = "nofollow noopener";
+        li.appendChild(a);
+        frag.appendChild(li);
+      });
+      list.appendChild(frag);
+    }
+
+    function filter(){
+      const term = (q.value||"").toLowerCase().trim();
+      visible = term ? Array.from(all).filter(u => u.toLowerCase().includes(term)) : Array.from(all);
+      render();
+      stats.textContent = `Total links: ${all.size} • Showing: ${visible.length}${term?' (filtered)':''}`;
+    }
+
     q.addEventListener('input', filter);
-    clearBtn.addEventListener('click', ()=>{ q.value=''; filter(); });
-    filter();
+    clearBtn.addEventListener('click', ()=>{ q.value=""; filter(); });
+    copyBtn.addEventListener('click', async ()=>{
+      try{ await navigator.clipboard.writeText(visible.join('\n'));
+        copyBtn.textContent = "Copied!"; setTimeout(()=>copyBtn.textContent="Copy Visible",1200);
+      }catch{ alert("Copy failed"); }
+    });
+
+    load();
   </script>
 </body>
 </html>
