@@ -1,45 +1,82 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<title>MahakalTimes Sitemap Hub</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="canonical" href="https://sitemaps.mahakaltimes.com/">
-<link rel="stylesheet" href="/assets/styles.css">
-<meta name="robots" content="index,follow">
+  <meta charset="utf-8" />
+  <title>MahakalTimes — Sitemap Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://sitemaps.mahakaltimes.com/">
+
+  <!-- Link external CSS -->
+  <link rel="stylesheet" href="/assets/styles.css">
 </head>
 <body>
-  <!-- Navbar -->
-  <!-- paste navbar snippet here -->
+  <!-- Header / Navbar -->
   <header class="header">
     <nav class="nav">
       <a href="/" class="logo">MahakalTimes Sitemaps</a>
       <div class="links">
-        <a href="/backlink-hub.html" data-nav="backlinks">Backlink Hub</a>
-        <a href="/tier3-hub.html" data-nav="tier3">Tier-3 Hub</a>
-        <a href="/press-coverage.html" data-nav="press">Press Coverage</a>
-        <a href="/sitemap_index.xml" data-nav="sitemaps">Sitemaps</a>
+        <a href="/backlink-hub.html">Backlink Hub</a>
+        <a href="/tier3-hub.html">Tier-3 Hub</a>
+        <a href="/press-coverage.html">Press Coverage</a>
+        <a href="/sitemap_index_final.xml">Sitemap Index</a>
+        <button id="themeToggle" class="toggle" type="button" aria-label="Toggle theme">🌗 Theme</button>
       </div>
     </nav>
   </header>
 
-  <main class="container">
-    <div class="grid">
-      <section class="card col-12">
-        <h1>MahakalTimes – Sitemap & Link Hubs</h1>
-        <p class="small">This subdomain is only for <b>indexing & discovery</b>—no external backlink XML, so that GSC remains clean.</p>
-        <ul>
-          <li><a href="/sitemap_index.xml">Sitemap Index</a> – only sitemaps of our domain</li>
-          <li><a href="/backlink-hub.html">Backlink Hub</a> – HTML hub of external backlinks (safest for GSC)</li>
-          <li><a href="/press-coverage.html">Press Coverage</a> – earned media mentions</li>
-          <li><a href="/tier3-hub.html">Tier-3 Hub</a> – experimental/low-priority links</li>
-        </ul>
-        <p class="small">Issues? Contact: info@mahakaltimes.com</p>
-      </section>
-    </div>
+  <!-- Main -->
+  <main class="wrap">
+    <section class="card">
+      <span class="pill">Utility Subdomain</span>
+      <h1>MahakalTimes — Sitemap & Link Hub</h1>
+      <p class="muted">
+        This mini-site keeps Google Search Console clean: XML files list only our own domain’s URLs,
+        while external backlinks are shown on HTML hubs (not inside sitemaps).
+      </p>
+
+      <ul class="grid">
+        <li class="card">
+          <strong>Sitemap Index</strong><br>
+          <a href="/sitemap_index_final.xml">/sitemap_index_final.xml</a><br>
+          <span class="muted">Submit this URL in GSC. Do not include external links in any XML.</span>
+        </li>
+        <li class="card">
+          <strong>Backlink Hub (HTML)</strong><br>
+          <a href="/backlink-hub.html">/backlink-hub.html</a><br>
+          <span class="muted">External mentions directory; safe for GSC.</span>
+        </li>
+      </ul>
+    </section>
   </main>
 
-  <footer class="footer"><div class="container small">© MahakalTimes. Subdomain for technical SEO utilities.</div></footer>
-  <script type="module" src="/assets/app.js"></script>
+  <!-- Footer -->
+  <footer>
+    <div class="wrap fgrid">
+      <div class="fcol">
+        <h4>Core</h4>
+        <a href="/sitemap_index_final.xml">Sitemap Index (XML)</a>
+        <a href="/robots.txt">robots.txt</a>
+        <a href="/404.html">Custom 404</a>
+      </div>
+      <div class="fcol">
+        <h4>Hubs</h4>
+        <a href="/backlink-hub.html">Backlink Hub</a>
+        <a href="/press-coverage.html">Press Coverage</a>
+        <a href="/tier3-hub.html">Tier-3 Hub</a>
+      </div>
+      <div class="fcol">
+        <h4>Policy / Admin</h4>
+        <a href="/about.html">About this Subdomain</a>
+        <a href="/terms.html">Terms of Use</a>
+        <a href="/privacy.html">Privacy Policy</a>
+        <a href="/changelog.html">Change Log</a>
+      </div>
+    </div>
+    <div class="wrap copy">© MahakalTimes. Technical SEO utilities subdomain.</div>
+  </footer>
+
+  <!-- Link external JS -->
+  <script src="/assets/app.js"></script>
 </body>
 </html>
