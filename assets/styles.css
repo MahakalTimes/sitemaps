@@ -62,9 +62,7 @@ footer{border-top:1px solid var(--line);background:var(--card);margin-top:32px}
   color: var(--muted);
   cursor: pointer;
 }
-.btn:hover {
-  color: var(--text);
-}
+.btn:hover { color: var(--text); }
 
 .stats {
   margin: 6px 0 16px;
@@ -75,11 +73,15 @@ footer{border-top:1px solid var(--line);background:var(--card);margin-top:32px}
   max-height: 65vh;       /* scroll limit */
   overflow: auto;         /* enable scrollbar */
   line-height: 1.6;
-  padding-left: 20px;
+  list-style: decimal inside;  /* ✅ numbers visible */
+  padding-left: 0;
+  margin: 0;
+}
+
+.list a {
+  word-break: break-all;  /* long URLs wrap instead of cutting */
 }
 
 .err {
   color: #ff7b7b;
 }
-
-
